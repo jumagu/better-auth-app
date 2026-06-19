@@ -1,0 +1,10 @@
+{
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.codeActionsOnSave": {
+    "source.organizeImports": "never",
+    "source.fixAll.ts": "never",
+    "source.fixAll.eslint": "never"
+  },
+  "css.lint.unknownAtRules": "ignore"
+}
