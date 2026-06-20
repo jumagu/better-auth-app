@@ -1,18 +1,48 @@
 'use client';
 
 import type { SubmitEvent } from 'react';
-import { AuthDivider } from '../components/auth-divider';
+
+import { authClient } from '@/lib/auth-client';
+
 import { AuthField } from '../components/auth-field';
+import { AuthDivider } from '../components/auth-divider';
 import { SocialSignInButtons } from '../components/social-sign-in-buttons';
 
 export function LoginForm() {
-  function handleSubmit(event: SubmitEvent<HTMLFormElement>) {
+  const handleSubmit = async (event: SubmitEvent<HTMLFormElement>) => {
     event.preventDefault();
+
     const formData = new FormData(event.currentTarget);
-    const email = formData.get('email');
-    const password = formData.get('password');
-    console.log('Login:', { email, password });
-  }
+    const email = formData.get('email') as string;
+    const password = formData.get('password') as string;
+
+    const { data, error } = await authClient.signIn.email(
+      {
+        email, // The user email
+        password, // The user password
+        callbackURL: '/dashboard', // * A URL to redirect to after the user verifies their email (optional)
+        rememberMe: false, // remember the user session after the browser is closed. (default: true)
+      },
+      {
+        // * Callbacks
+        onRequest: (ctx) => {
+          console.log('Triggered sign in request:', { ctx });
+          // show loading
+        },
+        onSuccess: (ctx) => {
+          console.log('Signed in successfully:', { ctx });
+          // redirect to the dashboard or sign in page
+        },
+        onError: (ctx) => {
+          console.log('Sign in error:', { ctx });
+          // display the error message
+          alert(ctx.error.message);
+        },
+      }
+    );
+
+    console.log('Sign in result:', { data, error });
+  };
 
   return (
     <>
