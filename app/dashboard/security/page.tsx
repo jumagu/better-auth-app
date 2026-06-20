@@ -1,11 +1,21 @@
-import { UserEmailInformation } from '../components/user-email-information';
+import { headers } from 'next/headers';
+
+import { auth } from '@/lib/auth';
+
 import { TwoFactorSettings } from './components/two-factor-settings';
+import { UserEmailInformation } from '../components/user-email-information';
 
 export const metadata = {
   title: 'Security — Dashboard',
 };
 
-export default function SecurityPage() {
+export default async function SecurityPage() {
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+
+  const is2FAEnabled = !!session?.user.twoFactorEnabled;
+
   return (
     <>
       <header className="border-b border-zinc-200 bg-white px-8 py-6 dark:border-zinc-800 dark:bg-zinc-950">
@@ -26,7 +36,7 @@ export default function SecurityPage() {
 
       <main className="flex-1 p-8">
         <div className="max-w-3xl">
-          <TwoFactorSettings />
+          <TwoFactorSettings isEnabled={is2FAEnabled} />
         </div>
       </main>
     </>

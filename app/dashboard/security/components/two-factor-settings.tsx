@@ -1,8 +1,12 @@
 'use client';
 
 import { useState } from 'react';
-import { PasswordConfirmModal } from './password-confirm-modal';
+import { useRouter } from 'next/navigation';
+
+import { authClient } from '@/lib/auth-client';
+
 import { TwoFactorSetup } from './two-factor-setup';
+import { PasswordConfirmModal } from './password-confirm-modal';
 
 type TwoFactorSettingsProps = {
   isEnabled?: boolean;
@@ -14,61 +18,83 @@ type SetupData = {
   backupCodes: string[];
 };
 
-// Sample data for the design. It will be replaced by the server response.
-const MOCK_SETUP_DATA: SetupData = {
-  totpUri:
-    'otpauth://totp/DemoApp:user@example.com?secret=JBSWY3DPEHPK3PXP&issuer=DemoApp',
-  secretKey: 'JBSWY3DPEHPK3PXP',
-  backupCodes: [
-    '8f3a-2b1c',
-    'd4e5-6f7a',
-    '1c2d-3e4f',
-    '9a8b-7c6d',
-    '5e4f-3a2b',
-    '7c8d-9e0f',
-    '2b3c-4d5e',
-    '6f7a-8b9c',
-  ],
-};
-
 export function TwoFactorSettings({
   isEnabled = false,
 }: TwoFactorSettingsProps) {
+  const router = useRouter();
+
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [modalAction, setModalAction] = useState<'enable' | 'disable'>(
     'enable'
   );
   const [setupData, setSetupData] = useState<SetupData | null>(null);
 
-  function handleOpenPasswordModal(action: 'enable' | 'disable') {
+  const handleOpenPasswordModal = (action: 'enable' | 'disable') => {
     setModalAction(action);
     setShowPasswordModal(true);
-  }
+  };
 
-  function handleClosePasswordModal() {
-    setShowPasswordModal(false);
-  }
+  const handleClosePasswordModal = () => setShowPasswordModal(false);
 
-  function handlePasswordConfirmed(_password: string) {
-    setShowPasswordModal(false);
-
+  const handlePasswordConfirmed = async (password: string) => {
     if (modalAction === 'enable') {
-      // TODO: call the server with the password and use its response
-      setSetupData(MOCK_SETUP_DATA);
+      // call the authClient with the password and use its response
+      const { data, error } = await authClient.twoFactor.enable({
+        password: password,
+        // issuer: 'Better Auth App', // ? (Optional) Already defined in the betterAuth instance within appName
+      });
+
+      console.info('2FA enable result:', { data, error });
+
+      if (error) {
+        alert(error.message ?? 'Something went wrong. Please try again.');
+        return;
+      }
+
+      setSetupData({
+        totpUri: data.totpURI,
+        secretKey: 'JBSWY3DPEHPK3PXP',
+        backupCodes: data.backupCodes,
+      });
+      setShowPasswordModal(false);
+
       return;
     }
 
-    // TODO: disable 2FA
-  }
+    // * Disable
+    const { data, error } = await authClient.twoFactor.disable({
+      password: password,
+    });
 
-  function handleCancelSetup() {
-    setSetupData(null);
-  }
+    console.info('2FA disable result:', { data, error });
 
-  function handleCompleteSetup() {
-    // TODO: confirm activation on the server
+    if (error) {
+      alert(error.message ?? 'Something went wrong. Please try again.');
+      return;
+    }
+
+    router.refresh();
+    setShowPasswordModal(false);
+  };
+
+  const handleCancelSetup = () => setSetupData(null);
+
+  const handleCompleteSetup = async (code: string) => {
+    const { data, error } = await authClient.twoFactor.verifyTotp({
+      code: code,
+      trustDevice: false,
+    });
+
+    console.info('2FA verification result:', { data, error });
+
+    if (error) {
+      alert(error.message ?? 'Something went wrong. Please try again.');
+      return;
+    }
+
     setSetupData(null);
-  }
+    router.refresh();
+  };
 
   const modalCopy =
     modalAction === 'enable'

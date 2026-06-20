@@ -1,7 +1,12 @@
 import { betterAuth } from 'better-auth';
+import { twoFactor } from 'better-auth/plugins';
 import { Pool } from 'pg';
 
 export const auth = betterAuth({
+  appName: 'Better Auth App',
+
+  plugins: [twoFactor()],
+
   database: new Pool({
     connectionString: process.env.DATABASE_URL,
     ssl: true,
