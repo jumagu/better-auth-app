@@ -1,3 +1,7 @@
+import { headers } from 'next/headers';
+
+import { auth } from '@/lib/auth';
+
 import { StatCard } from './components/stat-card';
 import { UserEmailInformation } from './components/user-email-information';
 
@@ -28,7 +32,13 @@ const recentActivity = [
   },
 ];
 
-export default function DashboardPage() {
+export default async function DashboardPage() {
+  // ? This is how you can get the user session on the server side
+  // ?  See: https://better-auth.com/docs/basic-usage#server-side
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+
   return (
     <>
       <header className="border-b border-zinc-200 bg-white px-8 py-6 dark:border-zinc-800 dark:bg-zinc-950">
@@ -73,7 +83,7 @@ export default function DashboardPage() {
             <div className="rounded-2xl border border-zinc-200 bg-white shadow-sm dark:border-zinc-800 dark:bg-zinc-950">
               <div className="border-b border-zinc-200 px-6 py-4 dark:border-zinc-800">
                 <h2 className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">
-                  Activity for: TEST_USER
+                  Activity for: {session?.user?.name}
                 </h2>
               </div>
               <ul className="divide-y divide-zinc-100 dark:divide-zinc-800">
