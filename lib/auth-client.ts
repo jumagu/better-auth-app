@@ -3,5 +3,9 @@ import { twoFactorClient } from 'better-auth/client/plugins';
 
 export const authClient = createAuthClient({
   baseURL: process.env.BETTER_AUTH_URL,
-  plugins: [twoFactorClient()],
+  plugins: [
+    twoFactorClient({
+      twoFactorPage: '/auth/two-factor',
+    }),
+  ],
 });

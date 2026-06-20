@@ -5,7 +5,11 @@ import { Pool } from 'pg';
 export const auth = betterAuth({
   appName: 'Better Auth App',
 
-  plugins: [twoFactor()],
+  plugins: [
+    twoFactor({
+      allowPasswordless: true, // To allow OAuth/social users to activate 2FA
+    }),
+  ],
 
   database: new Pool({
     connectionString: process.env.DATABASE_URL,

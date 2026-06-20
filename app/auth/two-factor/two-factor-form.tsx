@@ -1,15 +1,33 @@
 'use client';
 
 import { useState, type SubmitEvent } from 'react';
+
+import { useRouter } from 'next/navigation';
+
+import { authClient } from '@/lib/auth-client';
 import { OtpInput } from '../components/otp-input';
 
 export function TwoFactorForm() {
+  const router = useRouter();
   const [code, setCode] = useState('');
 
-  function handleSubmit(event: SubmitEvent<HTMLFormElement>) {
+  const handleSubmit = async (event: SubmitEvent<HTMLFormElement>) => {
     event.preventDefault();
-    console.log('Two factor code:', code);
-  }
+
+    const { data, error } = await authClient.twoFactor.verifyTotp({
+      code: code,
+      trustDevice: false,
+    });
+
+    console.info('[Sign-in] 2FA verification result:', { data, error });
+
+    if (error) {
+      alert(error.message ?? 'Something went wrong. Please try again.');
+      return;
+    }
+
+    router.replace('/dashboard');
+  };
 
   const isComplete = code.length === 6;
 
