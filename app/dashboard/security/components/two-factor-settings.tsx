@@ -53,7 +53,9 @@ export function TwoFactorSettings({
 
       setSetupData({
         totpUri: data.totpURI,
-        secretKey: 'JBSWY3DPEHPK3PXP',
+        secretKey:
+          new URLSearchParams(data.totpURI.split('?')[1]).get('secret') ??
+          'No key',
         backupCodes: data.backupCodes,
       });
       setShowPasswordModal(false);

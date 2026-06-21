@@ -76,9 +76,12 @@ export function TwoFactorSetup({
                 Enter this key manually in your authenticator app:
               </p>
               <div className="flex items-center gap-2">
-                <code className="flex-1 rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2.5 font-mono text-sm tracking-wider text-zinc-900 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-50">
-                  {secretKey}
-                </code>
+                <input
+                  type="text"
+                  value={secretKey}
+                  className="flex-1 rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2.5 font-mono text-sm tracking-wider text-zinc-900 outline-none transition-colors focus:border-zinc-900 focus:ring-2 focus:ring-zinc-900/10 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-50 dark:focus:border-zinc-400 dark:focus:ring-zinc-400/10"
+                  readOnly
+                />
                 <button
                   type="button"
                   onClick={handleCopySecret}
